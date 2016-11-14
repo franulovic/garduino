@@ -1,6 +1,5 @@
 #include <ThingSpeak.h>
 #include <dht.h>
-
 #include <SPI.h>
 #include <Ethernet.h>
 
@@ -15,24 +14,21 @@
  *  - ThingSpeak integration for cloud upload of values
 */
 
-
 // Ethernet declarations
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED};
 EthernetClient client;
-
 
 // ThingSpeak
 unsigned long myChannelNumber = 174024;
 const char * myWriteAPIKey = "I9651R8WWE30XEZW";
 int timer = 200;
 
-
 // leds for the digital output
-int led1 = 8;
-int led2 = 9;
-int led3 = 10;
-int led4 = 11;
-int led5 = 12;
+int led1 = 3;
+int led2 = 4;
+int led3 = 5;
+int led4 = 6;
+int led5 = 7;
 
 // Declarations of variables for Light Sensor
 int photoRPin = A2;      // Using A2 
@@ -42,28 +38,25 @@ int lightLevel;
 int adjustedLightLevel;
 
 // Variables for Humidity Sensor
-int humidityRPin = 0;    // Using A0
+int humidityRPin = A0;    // Using A0
 
 // Variables for DHT (air humidity and temperature) Sensor
 dht DHT;              // DHT variable
-#define DHT11_PIN 7   // the PWM pin the DHT11 is attached to
+#define DHT11_PIN 8   // the PWM pin the DHT11 is attached to
 
 // Lamp control
 #define RELAY_ON 0
 #define RELAY_OFF 1
-#define lampPin 2   // Digital pin for lamp
+#define lampPin A5   // Using analog pin for lamp relay (digital pins are full)
 int lightState = RELAY_OFF; // Lamp off
-
 
 // Code for water pump
 #define WATER_ON 0
 #define WATER_OFF 1
-#define waterPin 3    // Digital pin for water pump
+#define waterPin 1    // Digital pin for water pump
 int pumpSafety = WATER_ON;   // Safety mode to disable pump if humidity detector fails
 int pumpCount = 0;
 int pumpState = WATER_OFF;
-
-
  
 // the setup routine runs once when you press reset:
 void setup() {
@@ -119,12 +112,12 @@ void loop() {
   int chk = DHT.read11(DHT11_PIN);
 
    // If you want to use serial monitor for DHT11 values, uncomment this section
- /* Serial.print("Temperature = ");
+  /*Serial.print("Temperature = ");
   Serial.println(DHT.temperature);
   Serial.print("Humidity = ");
   Serial.println(DHT.humidity);
-  */
-  /*
+  
+  
   Serial.print("Pump State = ");
   Serial.println(pumpState);
   Serial.print("Pump Safety = ");
@@ -247,22 +240,22 @@ void loop() {
   adjustedLightLevel = map(lightLevel, minLight, maxLight, 0, 100); 
 
 
-  if (adjustedLightLevel <= 10 && lightState == RELAY_OFF)
+  if (adjustedLightLevel <= 20 && lightState == RELAY_OFF)
   {
     digitalWrite (lampPin, RELAY_ON);
     lightState = RELAY_ON;
   }
-  else if (adjustedLightLevel > 10 && lightState == RELAY_ON)
+  else if (adjustedLightLevel > 20 && lightState == RELAY_ON)
   {
     digitalWrite (lampPin, RELAY_OFF); //only turn lamp off if it is on  
     lightState = RELAY_OFF;       
   }
  
   //Send the adjusted Light level result to Serial port (processing)
-  /*
+  
   Serial.print("Light Level = ");
   Serial.println(adjustedLightLevel);
-  */
+  
   // End of light sensor code
 
   // Write to ThingSpeak
